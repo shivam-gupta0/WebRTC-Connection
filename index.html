@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebRTC Connection</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      // When a message is received from the server, display it in the messages div
+      socket.on('message', (msg) => {
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML += msg + '<br>';
+      });
+
+      // When a number is received from the server, display it in the numbers div and add it to the local sum of numbers
+      socket.on('number', (data) => {
+        const numbersDiv = document.getElementById('numbers');
+        numbersDiv.innerHTML += data.randomNumber + '<br>';
+        const sumDiv = document.getElementById('sum');
+        sumDiv.innerHTML = parseInt(sumDiv.innerHTML) + parseInt(data.randomNumber);
+      });
+
+      // When a number is received from the server for the other client, add it to the local sum of numbers
+      socket.on('otherNumber', (data) => {
+        const sumDiv = document.getElementById('sum');
+        sumDiv.innerHTML = parseInt(sumDiv.innerHTML) + parseInt(data.randomNumber);
+      });
+
+      // When the user clicks the "Add Number" button, generate a random number between 1 and 9 and send it to the server
+      function addNumber() {
+        const randomNumber = Math.floor(Math.random() * 9) + 1;
+        socket.emit('addNumber', randomNumber);
+      }
+
+      // Call the addNumber function every intervalTime
+      const intervalTime = 2000; // 2 seconds in milliseconds
+
+      setInterval(() => {
+        addNumber();
+      }, intervalTime);
+
+    </script>
+  </head>
+  <body>
+    <h1>WebRTC Connection</h1>
+    <div>Generating a random number...</div>
+    <div id="numbers"></div>
+    <div>Local sum : <span id="sum">0</span></div>
+    <div id="messages"></div>
+  </body>
+</html>
